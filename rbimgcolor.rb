@@ -66,7 +66,7 @@ def colors_from_photo(file, num)
     results << {
       hsl: [h, s, l],
       hex: hex,
-      percent: ((p[1].to_f / total_depth.to_f) * 100).round(2)
+      fraction: ((p[1].to_f / total_depth.to_f) * 100).round(2)
     }
   end
 
@@ -86,12 +86,12 @@ puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
 puts "<img src=\"#{@file}\" width=\"#{@width}px\">"
 puts "<table width=\"#{@width}px\" style=\"table-layout: fixed;\"><tr>"
-colors.each do |c|
+colours.each do |c|
   puts "<td height=\"50px\" bgcolor=\"##{c[:hex]}\"></td>"
 end
 puts "</tr><tr>"
-colors.each do |c| 
-  puts "<td align=\"center\">#{c[:percent]}\%</td>"
+colours.each do |c| 
+  puts "<td align=\"center\">#{c[:fraction]}\%</td>"
 end
 puts "</tr></table>"
 puts "<img src=\"#{@file.to_s + "_recolored.jpg"}\" width=\"#{@width}px\">"
