@@ -9,7 +9,7 @@ if ARGV.size < 1
   exit
 end
 
-def piet(file, hue, num)
+def recolour(file, hue, num)
 
   image = Magick::ImageList.new(file)
   image.colorspace = Magick::HSLColorspace
@@ -79,9 +79,8 @@ end
 
 # puts "#{@file.basename}" + "_resized.jpg"
 
-colors = colors_from_photo(@file, @ncolors)
-
-piet(@file, colors[0][:hsl][0], @ncolors)
+colours = colors_from_photo(@file, @ncolors)
+recolour(@file, colours.first[:hsl][0], @ncolors)
 
 puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
