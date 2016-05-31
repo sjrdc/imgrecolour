@@ -4,10 +4,9 @@ require 'RMagick'
 require 'pathname'
 
 if ARGV.size < 1
-  puts "usage: #{$PROGRAM_NAME} img.ext"
+  puts "usage: #{$PROGRAM_NAME} img.ext [#colors]"
   exit
 end
-
 
 def colors_from_photo(file, num)
   image = Magick::ImageList.new(file)
@@ -30,14 +29,11 @@ def colors_from_photo(file, num)
     g2 += g2 unless g2.length == 2
     b2 += b2 unless b2.length == 2
 
-    rgb = "#{r1},#{g1},#{b1}"
     hex = "#{r2}#{g2}#{b2}"
-    depth = p[1]
 
     results << {
-      rgb: rgb,
       hex: hex,
-      percent: ((depth.to_f / total_depth.to_f) * 100).round(2)
+      percent: ((p[1].to_f / total_depth.to_f) * 100).round(2)
     }
   end
 
@@ -45,9 +41,10 @@ def colors_from_photo(file, num)
 end
 
 @file = Pathname(File.expand_path(ARGV[0]))
+@ncolors = ARGV.size == 2 ? ARGV[1].to_i : 10
 @width = 800
 
-colors = colors_from_photo(@file, 10)
+colors = colors_from_photo(@file, @ncolors)
 
 puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
