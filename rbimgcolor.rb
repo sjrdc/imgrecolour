@@ -29,11 +29,11 @@ def recolour(file, hue, num)
   
 end
 
-def colors_from_photo(file, num)
+def colours_from_photo(file, num)
   image = Magick::ImageList.new(file)
   q = image.quantize(num, Magick::HSLColorspace)
   palette = q.color_histogram.sort {|a, b| b[1] <=> a[1]}
-  total_depth = image.columns * image.rows
+  npixels = (image.columns * image.rows).to_f
   results = []
 
   palette.each do |p|
@@ -64,9 +64,9 @@ def colors_from_photo(file, num)
     hex = "#{r2}#{g2}#{b2}"
 
     results << {
-      hsl: {hue: h, s: s, l: l},
+      hsl: {hue: h, saturation: s, luminosity: l},
       hex: hex,
-      fraction: ((p[1].to_f / total_depth.to_f) * 100).round(2)
+      fraction: ((p[1].to_f / npixels) * 100).round(2)
     }
   end
 
@@ -79,7 +79,7 @@ end
 
 # puts "#{@file.basename}" + "_resized.jpg"
 
-colours = colors_from_photo(@file, @ncolors)
+colours = colours_from_photo(@file, @ncolors)
 recolour(@file, colours.first[:hsl][:hue], @ncolors)
 
 puts "<!DOCTYPE html>"
