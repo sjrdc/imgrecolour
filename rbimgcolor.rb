@@ -16,8 +16,7 @@ def colors_from_photo(file, num)
   total_depth = image.columns * image.rows
   results = []
 
-  palette.count.times do |i|
-    p = palette[i]
+  palette.each do |p|
 
     r1 = p[0].red / 256
     g1 = p[0].green / 256
