@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 
+require 'color'
 require 'RMagick'
 require 'pathname'
 
@@ -8,18 +9,49 @@ if ARGV.size < 1
   exit
 end
 
+def piet(file, hue, num)
+
+  image = Magick::ImageList.new(file)
+  image.colorspace = Magick::HSLColorspace
+  bin = (hue.to_f/(Magick::QuantumRange.to_f)*num).to_i
+  image.each_pixel do |p, r, c|
+    h = p.red.to_f
+    if (h./(Magick::QuantumRange.to_f)*num).to_i != bin then
+      p.green = 0
+      image.pixel_color(r, c, p)
+    end
+  end
+  image.write(file.to_s + "_recolored.jpg") do
+    self.quality = 100
+  end
+  # free up RAM
+  image.destroy!
+  
+end
+
 def colors_from_photo(file, num)
   image = Magick::ImageList.new(file)
-  q = image.quantize(num, Magick::RGBColorspace)
+  q = image.quantize(num, Magick::HSLColorspace)
   palette = q.color_histogram.sort {|a, b| b[1] <=> a[1]}
   total_depth = image.columns * image.rows
   results = []
 
   palette.each do |p|
 
-    r1 = p[0].red / 256
-    g1 = p[0].green / 256
-    b1 = p[0].blue / 256
+    h = p[0].red
+    s = p[0].green
+    l = p[0].blue
+    
+    rgb = Magick::Pixel.from_hsla(h.to_f/Magick::QuantumRange*360.to_i,
+                                  s.to_f/Magick::QuantumRange*256.to_i,
+                                  l.to_f/Magick::QuantumRange*256.to_i,
+                                  1);
+
+    r1 = rgb.red.to_i
+    g1 = rgb.green.to_i
+    b1 = rgb.blue.to_i
+
+    # puts "#{r1}#{g1}#{b1}"
 
     r2 = r1.to_s(16)
     g2 = g1.to_s(16)
@@ -32,6 +64,7 @@ def colors_from_photo(file, num)
     hex = "#{r2}#{g2}#{b2}"
 
     results << {
+      hsl: [h, s, l],
       hex: hex,
       percent: ((p[1].to_f / total_depth.to_f) * 100).round(2)
     }
@@ -44,7 +77,11 @@ end
 @ncolors = ARGV.size == 2 ? ARGV[1].to_i : 10
 @width = 800
 
+# puts "#{@file.basename}" + "_resized.jpg"
+
 colors = colors_from_photo(@file, @ncolors)
+
+piet(@file, colors[0][:hsl][0], @ncolors)
 
 puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
@@ -57,4 +94,7 @@ puts "</tr><tr>"
 colors.each do |c| 
   puts "<td align=\"center\">#{c[:percent]}\%</td>"
 end
-puts "</tr></table></body></html>"
+puts "</tr></table>"
+puts "<img src=\"#{@file.to_s + "_recolored.jpg"}\" width=\"#{@width}px\">"
+puts "</body></html>"
+
