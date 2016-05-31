@@ -66,14 +66,14 @@ def colors_from_photo(file, num)
 end
 
 @file = Pathname(File.expand_path(ARGV[0]))
+@width = 800
 
-width = 800
 colors = colors_from_photo(@file, 10)
 
 puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
-puts "<img src=\"#{@file}\" width=\"#{width}px\">"
-puts "<table width=\"#{width}px\" style=\"table-layout: fixed;\"><tr>"
+puts "<img src=\"#{@file}\" width=\"#{@width}px\">"
+puts "<table width=\"#{@width}px\" style=\"table-layout: fixed;\"><tr>"
 colors.each do |c|
   puts "<td height=\"50px\" bgcolor=\"##{c[:hex]}\"></td>"
 end
