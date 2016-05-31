@@ -25,9 +25,9 @@ def colors_from_photo(file, num)
     g2 = g1.to_s(16)
     b2 = b1.to_s(16)
 
-    r2 += r2 unless r2.length == 2 
-    g2 += g2 unless g2.length == 2
-    b2 += b2 unless b2.length == 2
+    r2 = "0" + r2 unless r2.length == 2 
+    g2 = "0" + g2 unless g2.length == 2
+    b2 = "0" + b2 unless b2.length == 2
 
     hex = "#{r2}#{g2}#{b2}"
 
