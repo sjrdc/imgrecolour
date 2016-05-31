@@ -1,31 +1,11 @@
+#!/usr/bin/ruby
+
 require 'RMagick'
 require 'pathname'
 
 if ARGV.size < 1
-  puts "hello, world!"
+  puts "usage: #{$PROGRAM_NAME} img.ext"
   exit
-end
-
-
-
-def quantize(file, n)  
-  img = Magick::Image.read(file).first
-  q = img.quantize(n, Magick::HSBColorspace)
-  return q
-end
-
-def resize_image(file)
-  img = Magick::Image.read(file).first
-
-  resized = img.resize_to_fit(@size)
-
-  path = @directory.join('_resized', File.basename(file))
-  resized.write(path) do
-    self.quality = 100
-  end
-  # free up RAM
-  img.destroy!
-  resized.destroy!
 end
 
 
