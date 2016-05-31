@@ -64,7 +64,7 @@ def colors_from_photo(file, num)
     hex = "#{r2}#{g2}#{b2}"
 
     results << {
-      hsl: [h, s, l],
+      hsl: {hue: h, s: s, l: l},
       hex: hex,
       fraction: ((p[1].to_f / total_depth.to_f) * 100).round(2)
     }
@@ -80,7 +80,7 @@ end
 # puts "#{@file.basename}" + "_resized.jpg"
 
 colours = colors_from_photo(@file, @ncolors)
-recolour(@file, colours.first[:hsl][0], @ncolors)
+recolour(@file, colours.first[:hsl][:hue], @ncolors)
 
 puts "<!DOCTYPE html>"
 puts "<html><head><title>#{@file}</title></head><body>"
