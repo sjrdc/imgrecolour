@@ -16,6 +16,33 @@ module ChunkyPNG::Color
     hue_pixel, hue_poxel = hue(pixel), hue(poxel)
     [(hue_pixel - hue_poxel) % 360, (hue_poxel - hue_pixel) % 360].min
   end
+
+  def from_hsv(hue, saturation, value, alpha = 255)
+      raise ArgumentError, "Hue must be between 0 and 360" unless (0..360).include?(hue)
+      raise ArgumentError, "Saturation must be between 0 and 1" unless (0..1).include?(saturation)
+      raise ArgumentError, "Value/brightness must be between 0 and 1" unless (0..1).include?(value)
+      chroma = value * saturation
+      rgb    = cylindrical_to_cubic(hue, saturation, value, chroma)
+      rgb.map! { |component| ((component + value - chroma) * 255).to_i }
+      rgb << alpha
+      self.rgba(*rgb)
+    end
+    alias_method :from_hsb, :from_hsv
+
+    def cylindrical_to_cubic(hue, saturation, y_component, chroma)
+      hue_prime = hue.fdiv(60)
+      x = chroma * (1 - (hue_prime % 2 - 1).abs)
+
+      case hue_prime
+      when (0...1); [chroma, x, 0]
+      when (1...2); [x, chroma, 0]
+      when (2...3); [0, chroma, x]
+      when (3...4); [0, x, chroma]
+      when (4...5); [x, 0, chroma]
+      when (5..6);  [chroma, 0, x]
+      end
+    end
+    private :cylindrical_to_cubic
 end
 
 module SelectiveColor
@@ -29,24 +56,24 @@ end
 
 
 if ARGV.size < 1
-  puts "usage: #{$PROGRAM_NAME} infile.png [tolerance] [outfile.png]"
+  puts "usage: #{$PROGRAM_NAME} infile.png [hue] [tolerance] [outfile.png]"
   exit
 end
 
 @infile = Pathname(File.expand_path(ARGV[0]))
-# @color = ARGV.size >= 2 ? ARGV[1].to_i : 10
-@tolerance = ARGV.size >= 2 ? ARGV[1].to_i : 10
-@outfile = Pathname(File.expand_path(ARGV[2]))
+@hue = ARGV.size >= 2 ? ARGV[1].to_i : 0
+@tolerance = ARGV.size >= 3 ? ARGV[2].to_i : 10
+@outfile = ARGV.size >= 4 ? Pathname(File.expand_path(ARGV[3])) : "out.png"
 
-def recolour(file, outfile, tolerance)
+def recolour(file, hue, tolerance, outfile)
+
   image = ChunkyPNG::Image.from_file(file)
   image.extend(SelectiveColor)
 
-  # Try the other colors if you like!
-  keep = ChunkyPNG::Color.rgb(0, 230, 0)
+  keep = ChunkyPNG::Color.from_hsv(hue, 1, 1)
   image.to_selective_color!(keep, tolerance)
   image.save(outfile)
 
 end
 
-recolour(@infile, @outfile, @tolerance)
+recolour(@infile, @hue, @tolerance, @outfile)
