@@ -29,23 +29,24 @@ end
 
 
 if ARGV.size < 1
-  puts "usage: #{$PROGRAM_NAME} img.ext [#colors]"
+  puts "usage: #{$PROGRAM_NAME} infile.png [tolerance] [outfile.png]"
   exit
 end
 
-@file = Pathname(File.expand_path(ARGV[0]))
+@infile = Pathname(File.expand_path(ARGV[0]))
 # @color = ARGV.size >= 2 ? ARGV[1].to_i : 10
 @tolerance = ARGV.size >= 2 ? ARGV[1].to_i : 10
+@outfile = Pathname(File.expand_path(ARGV[2]))
 
-def recolour(file, tolerance)
+def recolour(file, outfile, tolerance)
   image = ChunkyPNG::Image.from_file(file)
   image.extend(SelectiveColor)
 
   # Try the other colors if you like!
   keep = ChunkyPNG::Color.rgb(0, 230, 0)
   image.to_selective_color!(keep, tolerance)
-  image.save("output.png")
+  image.save(outfile)
 
 end
 
-recolour(@file, @tolerance)
+recolour(@infile, @outfile, @tolerance)
