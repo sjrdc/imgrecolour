@@ -48,7 +48,8 @@ end
 module SelectiveColor
   # Really simple, just change the pixels to grayscale if their distance to a
   # reference hue is larger than a delta value.
-  def to_selective_color!(reference, delta)
+  def to_selective_color!(hue, delta)
+    reference = ChunkyPNG::Color.from_hsv(hue, 1, 1)
     pixels.map!{|pixel| ChunkyPNG::Color.distance(pixel, reference) > delta ? ChunkyPNG::Color.to_grayscale(pixel) : pixel}
     self
   end
@@ -70,8 +71,7 @@ def recolour(file, hue, tolerance, outfile)
   image = ChunkyPNG::Image.from_file(file)
   image.extend(SelectiveColor)
 
-  keep = ChunkyPNG::Color.from_hsv(hue, 1, 1)
-  image.to_selective_color!(keep, tolerance)
+  image.to_selective_color!(hue, tolerance)
   image.save(outfile)
 
 end
